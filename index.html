@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Policy Study – Fill in the Blank</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      padding: 40px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    .policy-box {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    .blank {
+      display: inline-block;
+      min-width: 120px;
+      border-bottom: 2px solid #333;
+      margin: 0 4px;
+    }
+    input {
+      border: none;
+      outline: none;
+      font-size: 16px;
+      width: 100%;
+      background: transparent;
+      text-align: center;
+    }
+    button {
+      padding: 10px 18px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #1e4ed8;
+    }
+    .result {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Policy & Objective Study Tool</h1>
+
+<div id="policies"></div>
+
+<button onclick="checkAnswers()">Check Answers</button>
+<button onclick="loadAllPolicies()">New Version</button>
+
+<div id="result" class="result"></div>
+
+<script>
+  const stopWords = ["the","and","or","to","of","in","a","for","with","on","at","by","per"];
+
+  const policies = [
+    "Fulfill or exceed customer needs and requirements by delivering quality products in a consistent and timely manner.",
+    "Provide High Quality Products that provide exceptional radiation protection for medical applications.",
+    "Cultivate and maintain a commitment to continually improving our products and processes through effective use of our Quality System.",
+    "Promote a safe and efficient working environment.",
+    "Ensure commitment to operating an effective Quality System which complies with FDA 21CFR 820, ISO 13485:2016, ISO 9001:2015, PPE 2016:425, the EU MDR, UK MDR, and other regulatory requirements.",
+    "Have zero backorders on stocked products.",
+    "Ship 95% of non-stocked products within twenty working days.",
+    "No more than 2 shipping-related customer complaints per quarter.",
+    "Ship 95% of CP/PPE and CM manufactured product on time per agreed upon and confirmed timeframe.",
+    "Automated line production will result in no more than 2.5% non-conforming products per month and no more than 0.3% non-conforming products that must be scrapped.",
+    "No production-related non-conformances discovered by customers.",
+    "One independent clinical research study completed per year.",
+    "Hold a quarterly meeting of the product development team to evaluate potential new products.",
+    "Implement at least three PAR/OFIs per quarter.",
+    "Maintain 95% efficiency of key manual operations."
+  ];
+
+  let answers = [];
+
+  function loadAllPolicies() {
+    answers = [];
+    document.getElementById("result").textContent = "";
+    const container = document.getElementById("policies");
+    container.innerHTML = "";
+
+    policies.forEach((policy, pIndex) => {
+      let words = policy.split(" ");
+      let eligible = words
+        .map((w,i)=>({w:w.toLowerCase().replace(/[^a-z0-9]/g,""),i}))
+        .filter(x=>x.w.length>4 && !stopWords.includes(x.w));
+
+      let blanks = eligible.sort(()=>0.5-Math.random()).slice(0, Math.min(3, eligible.length));
+
+      blanks.forEach(b => {
+        answers.push({ key: `${pIndex}-${b.i}`, answer: words[b.i].replace(/[^a-zA-Z0-9]/g,"") });
+        words[b.i] = `<span class="blank"><input data-key="${pIndex}-${b.i}" /></span>`;
+      });
+
+      const div = document.createElement("div");
+      div.className = "policy-box";
+      div.innerHTML = `<p>${words.join(" ")}</p>`;
+      container.appendChild(div);
+    });
+  }
+
+  function checkAnswers() {
+    let correct = 0;
+
+    answers.forEach(item => {
+      const input = document.querySelector(`input[data-key='${item.key}']`);
+      if (!input) return;
+
+      if (input.value.trim().toLowerCase() === item.answer.toLowerCase()) {
+        correct++;
+        input.style.color = "green";
+      } else {
+        input.style.color = "red";
+        input.value = `${input.value || ""} → ${item.answer}`;
+      }
+    });
+
+    document.getElementById("result").textContent = `Score: ${correct} / ${answers.length}`;
+  }
+
+  loadAllPolicies();
+</script>
+
+</body>
+</html>
